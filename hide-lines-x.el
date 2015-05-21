@@ -2,14 +2,11 @@
 
 ;; Filename: hide-lines-x.el
 ;; Description: Commands for hiding lines based on a regexp. Based on hide-lines.el by Mark Hulme-Jones <ture at plig cucumber dot net>
-;; Author : Andrew Sichevoi
-;;          Mark Hulme-Jones <ture at plig cucumber dot net>
-;; Maintainer: Andrew Sichevoi
+;; Author : Andrew Sichevoi (http://thekondor.net)
+;;          Mark Hulme-Jones <ture at plig cucumber dot net> (original author)
 ;; Version: 20150521
-;; Last-Updated: n/a
-;;           By: n/a
+;; Keywords: convenience buffer filter
 ;; URL: https://github.com/thekondor/hide-lines-x
-;; Keywords: convenience
 ;; Compatibility: GNU Emacs 24.3.1
 ;; Package-Requires:  
 ;;
@@ -89,6 +86,8 @@
 
 ;;; Change log:
 ;;
+;; 2015/05/21 - Change: `hide-lines-x-show-all' removes filter from the current buffer by default. An universal argument must be provided to apply the operation to all buffers.
+;;
 ;; 2015/05/20 - Initial fork of `hide-lines.el'.
 ;;	
 ;; 2013/06/22 - Add namespace prefixes to functions and variables.
@@ -109,6 +108,7 @@
 ;;
 
 ;;; Require
+(require 'cl)
 
 
 ;;; Code:
@@ -151,6 +151,20 @@ overlay onto the hide-lines-x-invisible-areas list"
     (setq hide-lines-x-invisible-areas (cons overlay hide-lines-x-invisible-areas))
     (overlay-put overlay 'invisible 'hl)))
 
+(defun hide-lines-x-get-overlays (&optional buffer)
+  "Get overlays created for the specified `buffer'. If not specified overlays for all buffers are returned."
+  (let ((predicate (if buffer
+		       (lambda (overlay)
+			 (eq buffer (overlay-buffer overlay)))
+		     (lambda (overlay) t))))
+    (remove-if-not predicate hide-lines-x-invisible-areas)))
+  
+(defun hide-lines-x-delete-overlays (&optional buffer)
+  "Delete overlays created for the specified `buffer'. If not set overlays for all buffers are deleted."
+  (let ((overlays (hide-lines-x-get-overlays buffer)))
+    (mapc #'delete-overlay overlays)
+    overlays))
+
 ;;;###autoload
 (defun hide-lines-x-not-matching (search-text)
   "Hide lines that don't match the specified regexp."
@@ -191,15 +205,13 @@ overlay onto the hide-lines-x-invisible-areas list"
 
 ;;;###autoload
 (defun hide-lines-x-show-all ()
-  "Show all areas hidden by the filter-buffer command."
+  "Show all areas hidden by the `hide-lines-x-*-matching' command. If universal argument is specified, the command is applied for all buffers."
   (interactive)
-  (mapc (lambda (overlay) (delete-overlay overlay)) 
-        hide-lines-x-invisible-areas)
-  (setq hide-lines-x-invisible-areas ()))
+  (let* ((buffer (if current-prefix-arg
+		    nil (current-buffer)))
+	 (deleted-areas (hide-lines-x-delete-overlays buffer)))
+    (setq hide-lines-x-invisible-areas (set-difference hide-lines-x-invisible-areas deleted-areas))))
 
 (provide 'hide-lines-x)
-
-;; (magit-push)
-;; (yaoddmuse-post "EmacsWiki" "hide-lines-x.el" (buffer-name) (buffer-string) "update")
 
 ;;; hide-lines-x.el ends here
