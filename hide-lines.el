@@ -1,13 +1,14 @@
-;;; hide-lines.el --- Commands for hiding lines based on a regexp
+;;; hide-lines-x.el --- Commands for hiding lines based on a regexp
 
-;; Filename: hide-lines.el
-;; Description: Commands for hiding lines based on a regexp
-;; Author: Mark Hulme-Jones <ture at plig cucumber dot net>
-;; Maintainer: Joe Bloggs <vapniks@yahoo.com>
-;; Version: 20130623.1701
-;; Last-Updated: 2013-06-23 16:42:00
-;;           By: Joe Bloggs
-;; URL: https://github.com/vapniks/hide-lines
+;; Filename: hide-lines-x.el
+;; Description: Commands for hiding lines based on a regexp. Based on hide-lines.el by Mark Hulme-Jones <ture at plig cucumber dot net>
+;; Author : Andrew Sichevoi
+;;          Mark Hulme-Jones <ture at plig cucumber dot net>
+;; Maintainer: Andrew Sichevoi
+;; Version: 20150521
+;; Last-Updated: n/a
+;;           By: n/a
+;; URL: https://github.com/thekondor/hide-lines-x
 ;; Keywords: convenience
 ;; Compatibility: GNU Emacs 24.3.1
 ;; Package-Requires:  
@@ -37,18 +38,18 @@
 
 ;;; Commentary
 ;; 
-;; The simplest way to make hide-lines work is to add the following
+;; The simplest way to make hide-lines-x work is to add the following
 ;; lines to your .emacs file:
 ;; 
-;; (autoload 'hide-lines "hide-lines" "Hide lines based on a regexp" t)
-;; (global-set-key (kbd "C-c /") 'hide-lines)
+;; (autoload 'hide-lines-x "hide-lines-x" "Hide lines based on a regexp" t)
+;; (global-set-key (kbd "C-c /") 'hide-lines-x)
 ;; 
 ;; Now, when you type C-c /, you will be prompted for a regexp
 ;; (regular expression).  All lines matching this regexp will be
 ;; hidden in the buffer.
 ;; 
 ;; Alternatively, you can type C-u C-c / (ie. provide a prefix
-;; argument to the hide-lines command) to hide all lines that *do not*
+;; argument to the hide-lines-x command) to hide all lines that *do not*
 ;; match the specified regexp. If you want to reveal previously hidden
 ;; lines you can use any other prefix, e.g. C-u C-u C-c /
 ;; 
@@ -57,26 +58,26 @@
 ;;
 ;; Below are complete command list:
 ;;
-;;  `hide-lines'
+;;  `hide-lines-x'
 ;;    Hide lines matching the specified regexp.
-;;  `hide-lines-not-matching'
+;;  `hide-lines-x-not-matching'
 ;;    Hide lines that don't match the specified regexp.
-;;  `hide-lines-matching'
+;;  `hide-lines-x-matching'
 ;;    Hide lines matching the specified regexp.
-;;  `hide-lines-show-all'
+;;  `hide-lines-x-show-all'
 ;;    Show all areas hidden by the filter-buffer command.
 ;;
 ;;; Customizable Options:
 ;;
 ;; Below are customizable option list:
 ;;
-;;  `hide-lines-reverse-prefix'
-;;    If non-nil then `hide-lines' will call `hide-lines-matching' by default, and `hide-lines-not-matching' with a single prefix.
+;;  `hide-lines-x-reverse-prefix'
+;;    If non-nil then `hide-lines-x' will call `hide-lines-x-matching' by default, and `hide-lines-x-not-matching' with a single prefix.
 ;;    default = nil. This variable is buffer local so you can use different values for different buffers.
 
 ;;; Installation:
 ;;
-;; Put hide-lines.el in a directory in your load-path, e.g. ~/.emacs.d/
+;; Put hide-lines-x.el in a directory in your load-path, e.g. ~/.emacs.d/
 ;; You can add a directory to your load-path with the following line in ~/.emacs
 ;; (add-to-list 'load-path (expand-file-name "~/elisp"))
 ;; where ~/elisp is the directory you want to add 
@@ -84,13 +85,15 @@
 ;;
 ;; Add the following to your ~/.emacs startup file.
 ;;
-;; (require 'hide-lines)
+;; (require 'hide-lines-x)
 
 ;;; Change log:
+;;
+;; 2015/05/20 - Initial fork of `hide-lines.el'.
 ;;	
 ;; 2013/06/22 - Add namespace prefixes to functions and variables.
 ;;              Add licence and add to Marmalade repo.
-;;              Alter hide-lines so that it can also show all lines
+;;              Alter hide-lines-x so that it can also show all lines
 ;; 
 ;; 24/03/2004 - Incorporate fix for infinite loop bug from David Hansen.
 ;; 
@@ -110,46 +113,46 @@
 
 ;;; Code:
 
-(defgroup hide-lines nil
+(defgroup hide-lines-x nil
   "Commands for hiding lines based on a regexp.")
 
-(defvar hide-lines-invisible-areas ()
+(defvar hide-lines-x-invisible-areas ()
  "List of invisible overlays used by hidelines")
 
-(defcustom hide-lines-reverse-prefix nil
-  "If non-nil then `hide-lines' will call `hide-lines-matching' by default, and `hide-lines-not-matching' with a single prefix.
+(defcustom hide-lines-x-reverse-prefix nil
+  "If non-nil then `hide-lines-x' will call `hide-lines-x-matching' by default, and `hide-lines-x-not-matching' with a single prefix.
 Otherwise it's the other way round.
-In either case a prefix arg with any value apart from 1 or 4 will call `hide-lines-show-all'."
+In either case a prefix arg with any value apart from 1 or 4 will call `hide-lines-x-show-all'."
   :type 'boolean
-  :group 'hide-lines)
+  :group 'hide-lines-x)
 
-(make-variable-buffer-local 'hide-lines-reverse-prefix)
+(make-variable-buffer-local 'hide-lines-x-reverse-prefix)
 
 (add-to-invisibility-spec 'hl)
 
 ;;;###autoload
-(defun hide-lines (&optional arg)
+(defun hide-lines-x (&optional arg)
   "Hide lines matching the specified regexp.
 With prefix arg of 4 (C-u) hide lines that do not match the specified regexp.
 With any other prefix arg, reveal all hidden lines."
   (interactive "p")
   (cond ((= arg 4) (call-interactively
-                    (if hide-lines-reverse-prefix 'hide-lines-matching
-                      'hide-lines-not-matching)))
+                    (if hide-lines-x-reverse-prefix 'hide-lines-x-matching
+                      'hide-lines-x-not-matching)))
         ((= arg 1) (call-interactively
-                    (if hide-lines-reverse-prefix 'hide-lines-not-matching
-                      'hide-lines-matching)))
-        (t (call-interactively 'hide-lines-show-all))))
+                    (if hide-lines-x-reverse-prefix 'hide-lines-x-not-matching
+                      'hide-lines-x-matching)))
+        (t (call-interactively 'hide-lines-x-show-all))))
 
-(defun hide-lines-add-overlay (start end)
+(defun hide-lines-x-add-overlay (start end)
   "Add an overlay from `start' to `end' in the current buffer.  Push the
-overlay onto the hide-lines-invisible-areas list"
+overlay onto the hide-lines-x-invisible-areas list"
   (let ((overlay (make-overlay start end)))
-    (setq hide-lines-invisible-areas (cons overlay hide-lines-invisible-areas))
+    (setq hide-lines-x-invisible-areas (cons overlay hide-lines-x-invisible-areas))
     (overlay-put overlay 'invisible 'hl)))
 
 ;;;###autoload
-(defun hide-lines-not-matching (search-text)
+(defun hide-lines-x-not-matching (search-text)
   "Hide lines that don't match the specified regexp."
   (interactive "MHide lines not matched by regexp: ")
   (set (make-local-variable 'line-move-ignore-invisible) t)
@@ -159,16 +162,16 @@ overlay onto the hide-lines-invisible-areas list"
           (pos (re-search-forward search-text nil t)))
       (while pos
         (beginning-of-line)
-        (hide-lines-add-overlay start-position (point))
+        (hide-lines-x-add-overlay start-position (point))
         (forward-line 1)
         (setq start-position (point))
         (if (eq (point) (point-max))
             (setq pos nil)
           (setq pos (re-search-forward search-text nil t))))
-      (hide-lines-add-overlay start-position (point-max)))))
+      (hide-lines-x-add-overlay start-position (point-max)))))
 
 ;;;###autoload
-(defun hide-lines-matching  (search-text)
+(defun hide-lines-x-matching  (search-text)
   "Hide lines matching the specified regexp."
   (interactive "MHide lines matching regexp: ")
   (set (make-local-variable 'line-move-ignore-invisible) t)
@@ -180,23 +183,23 @@ overlay onto the hide-lines-invisible-areas list"
         (beginning-of-line)
         (setq start-position (point))
         (end-of-line)
-        (hide-lines-add-overlay start-position (+ 1 (point)))
+        (hide-lines-x-add-overlay start-position (+ 1 (point)))
         (forward-line 1)
         (if (eq (point) (point-max))
             (setq pos nil)
           (setq pos (re-search-forward search-text nil t)))))))
 
 ;;;###autoload
-(defun hide-lines-show-all ()
+(defun hide-lines-x-show-all ()
   "Show all areas hidden by the filter-buffer command."
   (interactive)
   (mapc (lambda (overlay) (delete-overlay overlay)) 
-        hide-lines-invisible-areas)
-  (setq hide-lines-invisible-areas ()))
+        hide-lines-x-invisible-areas)
+  (setq hide-lines-x-invisible-areas ()))
 
-(provide 'hide-lines)
+(provide 'hide-lines-x)
 
 ;; (magit-push)
-;; (yaoddmuse-post "EmacsWiki" "hide-lines.el" (buffer-name) (buffer-string) "update")
+;; (yaoddmuse-post "EmacsWiki" "hide-lines-x.el" (buffer-name) (buffer-string) "update")
 
-;;; hide-lines.el ends here
+;;; hide-lines-x.el ends here
