@@ -163,7 +163,12 @@ overlay onto the hide-lines-x-invisible-areas list"
   "Delete overlays created for the specified `buffer'. If not set overlays for all buffers are deleted."
   (let ((overlays (hide-lines-x-get-overlays buffer)))
     (mapc #'delete-overlay overlays)
+    (setq hide-lines-x-invisible-areas (set-difference hide-lines-x-invisible-areas overlays))
     overlays))
+
+(defun hide-lines-x-delete-overlays-current-buffer ()
+  "A shortcut for `hide-lines-x-delete-overlays' command with bound `current-buffer' as argument."
+  (hide-lines-x-delete-overlays (current-buffer)))
 
 ;;;###autoload
 (defun hide-lines-x-not-matching (search-text)
@@ -207,10 +212,11 @@ overlay onto the hide-lines-x-invisible-areas list"
 (defun hide-lines-x-show-all ()
   "Show all areas hidden by the `hide-lines-x-*-matching' command. If universal argument is specified, the command is applied for all buffers."
   (interactive)
-  (let* ((buffer (if current-prefix-arg
-		    nil (current-buffer)))
-	 (deleted-areas (hide-lines-x-delete-overlays buffer)))
-    (setq hide-lines-x-invisible-areas (set-difference hide-lines-x-invisible-areas deleted-areas))))
+  (hide-lines-x-delete-overlays (if current-prefix-arg nil
+				  (current-buffer))))
+
+;;;###autoload
+(add-hook 'kill-buffer-hook 'hide-lines-x-delete-overlays-current-buffer)
 
 (provide 'hide-lines-x)
 
