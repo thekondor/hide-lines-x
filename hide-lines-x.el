@@ -59,10 +59,17 @@
 ;;    Hide lines matching the specified regexp.
 ;;  `hide-lines-x-not-matching'
 ;;    Hide lines that don't match the specified regexp.
+;;  `hide-lines-x-not-matching-dwim'
+;;    An extended version of `hide-lines-x-not-matching' with DWIM semantics. Uses active region or symbol as a regexp w/o user prompt.
+;;    A supplied universal argument allows to edit DWIM regexp before applying.
 ;;  `hide-lines-x-matching'
 ;;    Hide lines matching the specified regexp.
+;;  `hide-lines-x-matching-dwim'
+;;    An extended version of `hide-lines-x-matching' with DWIM semantics. Uses active region or symbol as a regexp w/o user prompt.
+;;    A supplied universal argument allows to edit DWIM regexp before applying.
 ;;  `hide-lines-x-show-all'
-;;    Show all areas hidden by the filter-buffer command.
+;;    Show in the current buffer all areas hidden by the filter-buffer command.
+;;    A supplied universal arguments applies the operation to all buffers.
 ;;
 ;;; Customizable Options:
 ;;
@@ -85,6 +92,8 @@
 ;; (require 'hide-lines-x)
 
 ;;; Change log:
+;;
+;; 2015/05/25 - Add: `hide-lines-x-not-matching-dwim' and `hide-lines-x-matching-dwim' functions.
 ;;
 ;; 2015/05/21 - Change: `hide-lines-x-show-all' removes filter from the current buffer by default. An universal argument must be provided to apply the operation to all buffers.
 ;;
@@ -170,6 +179,19 @@ overlay onto the hide-lines-x-invisible-areas list"
   "A shortcut for `hide-lines-x-delete-overlays' command with bound `current-buffer' as argument."
   (hide-lines-x-delete-overlays (current-buffer)))
 
+(defun hide-lines-x-dwim-value ()
+  "Get meant value. Could be active region or symbol at point."
+  (cond ((use-region-p) (buffer-substring-no-properties (region-beginning) (region-end)))
+	((symbol-at-point) (symbol-name (symbol-at-point)))))
+
+(defun hide-lines-x-dwim-get-search-text (&optional with-correction)
+  "Get meant search text. The text could be corrected if `with-correction' argument is set."
+  (let* ((initial-needle (hide-lines-x-dwim-value))
+	 (approved-needle (cond
+			   ((or with-correction (not initial-needle)) (read-string "Correct: " initial-needle))
+			   (t initial-needle))))
+    approved-needle))
+
 ;;;###autoload
 (defun hide-lines-x-not-matching (search-text)
   "Hide lines that don't match the specified regexp."
@@ -188,6 +210,22 @@ overlay onto the hide-lines-x-invisible-areas list"
             (setq pos nil)
           (setq pos (re-search-forward search-text nil t))))
       (hide-lines-x-add-overlay start-position (point-max)))))
+
+;;;###autoload
+(defun hide-lines-x-not-matching-dwim (&optional with-correction)
+  "An extended version of `hide-lines-x-not-matching'. The search text is taken from active region or symbol at point. Optional `with-correction' argument allows to edit choosen search text."
+  (interactive "P")
+  (let ((search-text (hide-lines-x-dwim-get-search-text with-correction)))
+    (cond (search-text (hide-lines-x-not-matching search-text))
+	  (t (call-interactively 'hide-lines-x-not-matching)))))
+
+;;;###autoload
+(defun hide-lines-x-matching-dwim (&optional with-correction)
+  "An extended version of `hide-lines-x-matching'. The search text is taken from active region or symbol at point. Optional `with-correction' argument allows to edit choosen search text."
+  (interactive "P")
+  (let ((search-text (hide-lines-x-dwim-get-search-text with-correction)))
+    (cond (search-text (hide-lines-x-matching search-text))
+	  (t (call-interactively 'hide-lines-x-matching)))))
 
 ;;;###autoload
 (defun hide-lines-x-matching  (search-text)
