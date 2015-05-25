@@ -3,8 +3,7 @@
 ;; Filename: hide-lines-x.el
 ;; Description: Commands for hiding lines based on a regexp. Based on hide-lines.el by Mark Hulme-Jones <ture at plig cucumber dot net>
 ;; Author : Andrew Sichevoi (http://thekondor.net)
-;;          Mark Hulme-Jones <ture at plig cucumber dot net> (original author)
-;; Version: 20150521
+;; Version: 20150525
 ;; Keywords: convenience buffer filter
 ;; URL: https://github.com/thekondor/hide-lines-x
 ;; Compatibility: GNU Emacs 24.3.1
@@ -32,6 +31,8 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program; see the file COPYING.
 ;; If not, see <http://www.gnu.org/licenses/>.
+
+;; Author of hide-lines.x: Mark Hulme-Jones <ture at plig cucumber dot net>
 
 ;;; Commentary
 ;; 
@@ -98,18 +99,6 @@
 ;; 2015/05/21 - Change: `hide-lines-x-show-all' removes filter from the current buffer by default. An universal argument must be provided to apply the operation to all buffers.
 ;;
 ;; 2015/05/20 - Initial fork of `hide-lines.el'.
-;;	
-;; 2013/06/22 - Add namespace prefixes to functions and variables.
-;;              Add licence and add to Marmalade repo.
-;;              Alter hide-lines-x so that it can also show all lines
-;; 
-;; 24/03/2004 - Incorporate fix for infinite loop bug from David Hansen.
-;; 
-
-;;; Acknowledgements:
-;;
-;; David Hansen.
-;;
 
 ;;; TODO
 ;;

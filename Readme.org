@@ -1,55 +1,66 @@
 * Library Information
+
  Readme.org --- Commands for hiding lines based on a regexp
 
- - Filename :: [[file:hide-lines.el][hide-lines.el]]
+ - Filename :: [[file:hide-lines.el][hide-lines-x.el]]
  - Description :: Commands for hiding lines based on a regexp
- - Author :: Mark Hulme-Jones <ture at plig cucumber dot net>
- - Maintainer :: Joe Bloggs <vapniks@yahoo.com>
- - Version :: 20130623.1701
- - Last-Updated :: 2013-06-22 22:38:04
- -           By :: Joe Bloggs
- - URL :: https://github.com/vapniks/hide-lines
- - Keywords :: convenience
+ - Author :: Andrew Sichevoi (http://thekondor.net)
+ - Version :: 20150525
+ - URL :: https://github.com/thekondor/hide-lines-x
+ - Keywords :: convenience buffer filter
  - Compatibility :: GNU Emacs 24.3.1
 
 * Commentary
 
-The simplest way to make hide-lines work is to add the following
+** General
+
+The simplest way to make hide-lines-x work is to add the following
 lines to your .emacs file:
 
-(autoload 'hide-lines "hide-lines" "Hide lines based on a regexp" t)
-(global-set-key "\C-ch" 'hide-lines)
+(autoload 'hide-lines-x "hide-lines-x" "Hide lines based on a regexp" t)
+(global-set-key "\C-ch" 'hide-lines-x)
 
 Now, when you type C-c h, you will be prompted for a regexp
 (regular expression).  All lines matching this regexp will be
 hidden in the buffer.
 
 Alternatively, you can type C-u C-c h (ie. provide a prefix
-argument to the hide-lines command) to hide all lines that *do not*
+argument to the hide-lines-x command) to hide all lines that *do not*
 match the specified regexp.
 
+There are also DWIM versions of the above mentioned hide functions.
+
 If you want to make all of the hidden areas re-appear again, type:
-M-x show-all-invisible
-Or you can bind show-all-invisible to a key and use that to show
+M-x hide-lines-x-show-all
+Or you can bind `hide-lines-x-show-all' to a key and use that to show
 all the hidden areas again.
 
 ** Commands
 
 Below is a complete command list:
 
- - `hide-lines' : Call `hide-lines-matching'. With a prefix arg of 4 (C-u) call `hide-lines-not-matching'.
-   With any other prefix call `hide-lines-show-all'.
- - `hide-lines-not-matching' : Hide lines that don't match the specified regexp.
- - `hide-lines-matching' : Hide lines matching the specified regexp.
- - `hide-lines-show-all' : Show all areas hidden by the filter-buffer command
+ - `hide-lines-x' : Call `hide-lines-x-matching'. With a prefix arg of 4 (C-u) call `hide-lines-x-not-matching'.
+   With any other prefix call `hide-lines-x-show-all'.
+ - `hide-lines-x-not-matching' : Hide lines that don't match the specified regexp.
+ - `hide-lines-x-not-matching-dwim' : DWIM version of `hide-lines-x-not-matching'.
+ - `hide-lines-x-matching' : Hide lines matching the specified regexp.
+ - `hide-lines-x-matching-dwim' : DWIM version of `hide-lines-x-matching'.
+ - `hide-lines-x-show-all' : Show in the current buffer all areas hidden by the filter-buffer command.
 
 ** Options
 
- - `hide-lines-reverse-prefix' : If non-nil then `hide-lines' will call `hide-lines-matching' by default, and `hide-lines-not-matching' with a single prefix.
-   Otherwise it's the other way round. In either case a prefix arg with any value apart from 1 or 4 will call `hide-lines-show-all'.
+ - `hide-lines-x-reverse-prefix' : If non-nil then `hide-lines-x' will call `hide-lines-x-matching' by default, and `hide-lines-x-not-matching' with a single prefix.
+   Otherwise it's the other way round. In either case a prefix arg with any value apart from 1 or 4 will call `hide-lines-x-show-all'.
    This variable is buffer local so you can use different values for different buffers.
+
 * Installation
 
- - If you have [[http://www.marmalade-repo.org/][marmalade-repo.org]], this hide-lines is part of the emacs packages you can install.  Just type M-x package-install hide-lines marmalade 
- - Otherwise download the library from here Lisp:hide-lines, and put it in a directory in the emacs load path, like ~/.emacs.d
- - Add (require 'hide-lines) in your ~/.emacs file
+ - Download the latest version of the library from https://github.com/thekondor/hide-lines-x
+ - Add (require 'hide-lines-x) in your ~/.emacs file
+
+* About
+
+The library based on `hide-lines.el' by Mark Hulme-Jones <ture at plig cucumber dot net>.
+
+The main motivation of fork `hide-lines' is to add some extensions I missed w/o worrying
+to break backward compatibility.
