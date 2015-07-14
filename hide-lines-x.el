@@ -124,7 +124,19 @@ In either case a prefix arg with any value apart from 1 or 4 will call `hide-lin
   :type 'boolean
   :group 'hide-lines-x)
 
+(defcustom hide-lines-x-show-title t
+  "Snow `hide-lines-x-title-text' on the top of filtered buffer if set. Otherwise the target buffer is filtered silently."
+  :type '(choice (const :tag "Show title `hide-lines-x-title-text' in the each buffer" t)
+                 (const :tag "Filter silently without any text" nil))
+  :group 'hide-lines-x)
+
+(defcustom hide-lines-x-title-text "Filtered Bufer\n--------------\n"
+  "Text to show on the top of filtered buffer if `hide-lines-x-show-title' is set."
+  :type 'string
+  :group 'hide-lines-x)
+
 (make-variable-buffer-local 'hide-lines-x-reverse-prefix)
+(make-variable-buffer-local 'hide-lines-x--title-is-shown)
 
 (add-to-invisibility-spec 'hl)
 
@@ -141,6 +153,23 @@ With any other prefix arg, reveal all hidden lines."
                     (if hide-lines-x-reverse-prefix 'hide-lines-x-not-matching
                       'hide-lines-x-matching)))
         (t (call-interactively 'hide-lines-x-show-all))))
+
+(defun hide-lines-x--show-title (buffer)
+  "Insert overlay-based title to the specified `buffer' about active filtering."
+  (with-current-buffer buffer
+    (let ((overlay (make-overlay 0 0))
+          ;;; TODO: the title's properties should be customizable
+          (title (propertize hide-lines-x-title-text 'font-lock-face '(:foreground "DeepSkyBlue1"))))
+      (overlay-put overlay 'before-string title)
+      ;;; TODO: for initial stage of the feature, new overlay is added to the existing one with invisible areas. Should be separate sets of overlays.
+      (setq hide-lines-x-invisible-areas (cons overlay hide-lines-x-invisible-areas)))))
+
+(defun hide-lines-x--show-title-maybe (buffer)
+  "Insert an overlay with `hide-lines-x-title-text' to `buffer' if required."
+  (when (and hide-lines-x-show-title
+             (not hide-lines-x--title-is-shown))
+    (hide-lines-x--show-title buffer)
+    (setq-local hide-lines-x--title-is-shown t)))
 
 (defun hide-lines-x-add-overlay (start end)
   "Add an overlay from `start' to `end' in the current buffer.  Push the
@@ -160,7 +189,11 @@ overlay onto the hide-lines-x-invisible-areas list"
 (defun hide-lines-x-delete-overlays (&optional buffer)
   "Delete overlays created for the specified `buffer'. If not set overlays for all buffers are deleted."
   (let ((overlays (hide-lines-x-get-overlays buffer)))
-    (mapc #'delete-overlay overlays)
+    (mapc #'(lambda (overlay)
+              (with-current-buffer (overlay-buffer overlay)
+                (setq-local hide-lines-x--title-is-shown nil))
+              (delete-overlay overlay))
+          overlays)
     (setq hide-lines-x-invisible-areas (set-difference hide-lines-x-invisible-areas overlays))
     overlays))
 
@@ -186,6 +219,7 @@ overlay onto the hide-lines-x-invisible-areas list"
   "Hide lines that don't match the specified regexp."
   (interactive "MHide lines not matched by regexp: ")
   (set (make-local-variable 'line-move-ignore-invisible) t)
+  (hide-lines-x--show-title-maybe (current-buffer))
   (save-excursion 
     (goto-char (point-min))
     (let ((start-position (point-min))
@@ -221,6 +255,7 @@ overlay onto the hide-lines-x-invisible-areas list"
   "Hide lines matching the specified regexp."
   (interactive "MHide lines matching regexp: ")
   (set (make-local-variable 'line-move-ignore-invisible) t)
+  (hide-lines-x--show-title-maybe (current-buffer))
   (save-excursion
     (goto-char (point-min))
     (let ((pos (re-search-forward search-text nil t))
