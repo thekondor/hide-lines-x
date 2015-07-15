@@ -130,9 +130,13 @@ In either case a prefix arg with any value apart from 1 or 4 will call `hide-lin
                  (const :tag "Filter silently without any text" nil))
   :group 'hide-lines-x)
 
-(defcustom hide-lines-x-title-text "Filtered Bufer\n--------------\n"
+(defcustom hide-lines-x-title-text "Filtered Bufer\n\n"
   "Text to show on the top of filtered buffer if `hide-lines-x-show-title' is set."
   :type 'string
+  :group 'hide-lines-x)
+
+(defface hide-lines-x-title-face '((t :foreground "DeepSkyBlue1" :weight bold))
+  "Face to highlight `hide-lines-x-title-text'"
   :group 'hide-lines-x)
 
 (make-variable-buffer-local 'hide-lines-x-reverse-prefix)
@@ -158,8 +162,7 @@ With any other prefix arg, reveal all hidden lines."
   "Insert overlay-based title to the specified `buffer' about active filtering."
   (with-current-buffer buffer
     (let ((overlay (make-overlay 0 0))
-          ;;; TODO: the title's properties should be customizable
-          (title (propertize hide-lines-x-title-text 'font-lock-face '(:foreground "DeepSkyBlue1"))))
+          (title (propertize hide-lines-x-title-text 'face 'hide-lines-x-title-face)))
       (overlay-put overlay 'before-string title)
       ;;; TODO: for initial stage of the feature, new overlay is added to the existing one with invisible areas. Should be separate sets of overlays.
       (setq hide-lines-x-invisible-areas (cons overlay hide-lines-x-invisible-areas)))))
